@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Linking files:"
+for FILE in $(ls -a $(pwd))
+do
+	[[ $FILE =~ .[^.\s]*]]	ln -vfsF $FILE $HOME	
+done
