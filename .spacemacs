@@ -31,7 +31,9 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
-     gtags
+     ;irony
+     rtags
+     slack
      yaml
      windows-scripts
      floobits
@@ -69,9 +71,6 @@ values."
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
-                                      irony
-                                      flycheck-irony
-                                      company-irony
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -308,6 +307,7 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+  (push "/usr/local/share/emacs/site-lisp/rtags" load-path)
   )
 
 (defun dotspacemacs/user-config ()
@@ -317,18 +317,6 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-
-  ;;; Irony mode:
-  (eval-after-load 'company
-    '(add-to-list 'company-backend 'company-irony))
-
-  (eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
-
-  (when (boundp 'w32-pipe-read-delay)
-    (setq w32-pipe-read-delay 0))
-  (when (boundp 'w32-pipe-buffer-size)
-    (setq w32-pipe-buffer-size (* 64 1024)))
 
   (defun manny/revert-all-file-buffers ()
     (interactive)
@@ -366,14 +354,15 @@ you should place your code here."
   (setq org-clock-idle-time 10)
   (setq org-todo-keyword-faces
         '(("TODO" . "orange")
-          ("IDLE" . "yellow")
+          ("IDLE" . "purple")
+          ("CURRENT" . "yellow")
           ("DONE" . "green")
           ("STUCK" . "red")))
 
   (setq mac-option-modifier 'super)
   (setq mac-command-modifier 'meta)
-;; yasnippet
-  ;(define-key yas-minor-mode-map (kbd "<tab>") 'yas-expand)
+  ;; yasnippet
+                                        ;(define-key yas-minor-mode-map (kbd "<tab>") 'yas-expand)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -385,21 +374,26 @@ you should place your code here."
  ;; If there is more than one, they won't work right.
  '(debug-on-error nil)
  '(evil-want-Y-yank-to-eol nil)
- '(flycheck-c/c++-clang-executable "C:\\Program Files (x86)\\LLVM\\bin\\clang.exe")
+ '(flycheck-c/c++-clang-executable nil)
  '(flycheck-clang-args (quote ("-std=c++11")))
+ '(irony-cdb-search-directory-list
+   (quote
+    ("build/AllBuild/Ninja/Debug" "AllBuild" "Debug" "Ninja" "build")))
+ '(ns-auto-hide-menu-bar t)
  '(org-agenda-files (quote ("~/org/kernel395.org" "~/org/courses.org")))
  '(org-modules
    (quote
     (org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail org-w3m org-drill)))
  '(package-selected-packages
    (quote
-    (flycheck-irony company-irony irony helm-cscope xcscope helm-gtags ggtags stickyfunc-enhance srefactor yaml-mode powershell floobits racket-mode faceup idris-mode prop-menu livid-mode skewer-mode json-mode js2-refactor multiple-cursors company-tern dash-functional web-beautify simple-httpd json-snatcher json-reformat js2-mode js-doc tern coffee-mode winum unfill fuzzy go-guru go-eldoc company-go go-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data auctex-latexmk company-auctex auctex powerline spinner hydra parent-mode projectile pkg-info epl flx smartparens iedit anzu evil goto-chg undo-tree highlight diminish bind-map bind-key packed f dash s helm avy helm-core async popup package-build yapfify xterm-color smeargle shell-pop pyvenv pytest pyenv-mode py-isort pip-requirements orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim multi-term mmm-mode markdown-toc markdown-mode magit-gitflow live-py-mode hy-mode htmlize helm-pydoc helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help disaster diff-hl cython-mode company-statistics company-c-headers company-anaconda company cmake-mode clang-format auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spacemacs-theme spaceline restart-emacs request rainbow-delimiters quelpa popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line)))
+    (spotify helm-spotify multi rtags slack emojify circe oauth2 websocket ht cmake-ide levenshtein flycheck-irony company-irony irony helm-cscope xcscope helm-gtags ggtags stickyfunc-enhance srefactor yaml-mode powershell floobits racket-mode faceup idris-mode prop-menu livid-mode skewer-mode json-mode js2-refactor multiple-cursors company-tern dash-functional web-beautify simple-httpd json-snatcher json-reformat js2-mode js-doc tern coffee-mode winum unfill fuzzy go-guru go-eldoc company-go go-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data auctex-latexmk company-auctex auctex powerline spinner hydra parent-mode projectile pkg-info epl flx smartparens iedit anzu evil goto-chg undo-tree highlight diminish bind-map bind-key packed f dash s helm avy helm-core async popup package-build yapfify xterm-color smeargle shell-pop pyvenv pytest pyenv-mode py-isort pip-requirements orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim multi-term mmm-mode markdown-toc markdown-mode magit-gitflow live-py-mode hy-mode htmlize helm-pydoc helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help disaster diff-hl cython-mode company-statistics company-c-headers company-anaconda company cmake-mode clang-format auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spacemacs-theme spaceline restart-emacs request rainbow-delimiters quelpa popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line)))
  '(require-final-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ahs-face ((t (:background "DarkOliveGreen4" :foreground "gray91"))))
  '(font-lock-function-name-face ((t (:inherit regular :foreground "#bc6ec5"))))
  '(font-lock-keyword-face ((t (:inherit regular :foreground "#4f97d7"))))
  '(org-level-1 ((t (:foreground "#4f97d7" :weight normal :height 1.3))))
