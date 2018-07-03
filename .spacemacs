@@ -31,15 +31,28 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     treemacs
+     typescript
+     react
+     docker
+     swift
      rust
-     csharp
+     ;csharp
      cquery
      slack
      yaml
      windows-scripts
      floobits
+     (lsp
+     :variables
+     lsp-ui-sideline-mode nil)
      racket
-     javascript
+     (javascript
+      :variables
+      company-backends-js2-mode '((company-tern :with company-dabbrev :with company-yasnippet))
+      javascript-backend 'tern
+      tern-command '("/Users/mannyschneck/.nvm/versions/node/v8.11.1/bin/tern" "--no-port-file")
+      )
      idris
      html
      ;; ----------------------------------------------------------------
@@ -59,7 +72,8 @@ values."
      emacs-lisp
      git
      markdown
-     org
+     (org :variables
+          org-want-todo-bindings t)
      (shell :variables
             shell-default-height 30
             shell-default-position 'bottom)
@@ -67,11 +81,13 @@ values."
      syntax-checking
      version-control
      )
+   )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
+                                      import-js
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -84,7 +100,7 @@ values."
    ;; `used-but-keep-unused' installs only the used packages but won't uninstall
    ;; them if they become unused. `all' installs *all* packages supported by
    ;; Spacemacs and never uninstall them. (default is `used-only')
-   dotspacemacs-install-packages 'used-only))
+   dotspacemacs-install-packages 'used-only)
 
 (defun dotspacemacs/init ()
   "Initialization function.
@@ -146,6 +162,12 @@ values."
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
                          spacemacs-light)
+   ;; Set `gc-cons-threshold' and `gc-cons-percentage' when startup finishes.
+   ;; This is an advanced option and should not be changed unless you suspect
+   ;; performance issues due to garbage collection operations.
+   ;; (default '(100000000 0.1))
+   dotspacemacs-gc-cons '(100000000 0.1)
+
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
@@ -205,11 +227,11 @@ values."
    ;; auto-save the file in-place, `cache' to auto-save the file to another
    ;; file stored in the cache directory and `nil' to disable auto-saving.
    ;; (default 'cache)
-   dotspacemacs-auto-save-file-location 'cache
+   dotspacemacs-auto-save-file-location 'original
    ;; Maximum number of rollback slots to keep in the cache. (default 5)
    dotspacemacs-max-rollback-slots 5
    ;; If non nil, `helm' will try to minimize the space it uses. (default nil)
-   dotspacemacs-helm-resize nil
+   dotspacemacs-helm-resize t
    ;; if non nil, the helm header is hidden when there is only one source.
    ;; (default nil)
    dotspacemacs-helm-no-header nil
@@ -260,6 +282,7 @@ values."
    dotspacemacs-show-transient-state-color-guide t
    ;; If non nil unicode symbols are displayed in the mode line. (default t)
    dotspacemacs-mode-line-unicode-symbols t
+   dotspacemacs-mode-line-theme 'spacemacs
    ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters point
    ;; when it reaches the top or bottom of the screen. (default t)
@@ -319,6 +342,18 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+  ;; React
+  (setq-default
+   ;; js2-mode
+   js2-basic-offset 2
+   ;; web-mode
+   css-indent-offset 2
+   web-mode-markup-indent-offset 2
+   web-mode-css-indent-offset 2
+   web-mode-code-indent-offset 2
+   web-mode-attr-indent-offset 2)
+
+
   (add-hook 'rtags-jump-hook 'evil--jumps-push)
 
   (defun manny/revert-all-file-buffers ()
@@ -353,6 +388,9 @@ you should place your code here."
   (global-linum-mode 1)
   (set-face-foreground 'highlight 'nil)
 
+  ;; cquery
+  (setq lsp-highlight-symbol-at-point nil)
+
   ;; Org-mode
   (setq org-clock-idle-time 10)
   (setq org-todo-keyword-faces
@@ -361,6 +399,12 @@ you should place your code here."
           ("CURRENT" . "yellow")
           ("DONE" . "green")
           ("STUCK" . "red")))
+
+  (setq org-capture-templates
+        '(("t" "Todo" entry
+           (file+headline "~/org/phenix.org" "Tasks") "* TODO")
+          ("r" "Rant" entry
+           (file+headline "~/org/personal.org" "Rants") "* RANT")))
 
   (setq mac-option-modifier 'super)
   (setq mac-command-modifier 'meta)
@@ -375,7 +419,10 @@ you should place your code here."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(clang-format-executable "/usr/bin/clang-format-4.0")
+ '(clang-format-executable "clang-format")
+ '(cquery-extra-args
+   (quote
+    ("--log-file /Users/mannyschneck/logs/cquery.log" "--log-stdin-stdout-to-stderr")))
  '(debug-on-error nil)
  '(evil-want-Y-yank-to-eol nil)
  '(flycheck-c/c++-clang-executable nil)
@@ -385,16 +432,15 @@ you should place your code here."
    (quote
     ("build/AllBuild/Ninja/Debug" "AllBuild" "Debug" "Ninja" "build")))
  '(ns-auto-hide-menu-bar t)
- '(org-agenda-files (quote ("~/org/phenix.org")))
+ '(org-agenda-files (quote ("~/org/personal.org" "~/org/phenix.org")))
  '(org-modules
    (quote
     (org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail org-w3m org-drill)))
  '(package-selected-packages
    (quote
-    (lsp-ui company-lsp lsp-mode ghub org-category-capture irony-eldoc company-irony-c-headers spotify helm-spotify multi rtags slack emojify circe oauth2 websocket ht cmake-ide levenshtein flycheck-irony company-irony irony helm-cscope xcscope helm-gtags ggtags stickyfunc-enhance srefactor yaml-mode powershell floobits racket-mode faceup idris-mode prop-menu livid-mode skewer-mode json-mode js2-refactor multiple-cursors company-tern dash-functional web-beautify simple-httpd json-snatcher json-reformat js2-mode js-doc tern coffee-mode winum unfill fuzzy go-guru go-eldoc company-go go-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data auctex-latexmk company-auctex auctex powerline spinner hydra parent-mode projectile pkg-info epl flx smartparens iedit anzu evil goto-chg undo-tree highlight diminish bind-map bind-key packed f dash s helm avy helm-core async popup package-build yapfify xterm-color smeargle shell-pop pyvenv pytest pyenv-mode py-isort pip-requirements orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim multi-term mmm-mode markdown-toc markdown-mode magit-gitflow live-py-mode hy-mode htmlize helm-pydoc helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help disaster diff-hl cython-mode company-statistics company-c-headers company-anaconda company cmake-mode clang-format auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spacemacs-theme spaceline restart-emacs request rainbow-delimiters quelpa popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line)))
- '(python-shell-interpreter "ipython")
- '(require-final-newline nil)
- '(tramp-syntax (quote default) nil (tramp)))
+    (dockerfile-mode docker tablist docker-tramp swift-mode racer org-mime omnisharp flycheck-rust csharp-mode cargo rust-mode cquery lsp-ui company-lsp lsp-mode ghub org-category-capture irony-eldoc company-irony-c-headers spotify helm-spotify multi rtags slack emojify circe oauth2 websocket ht cmake-ide levenshtein flycheck-irony company-irony irony helm-cscope xcscope helm-gtags ggtags stickyfunc-enhance srefactor yaml-mode powershell floobits racket-mode faceup idris-mode prop-menu livid-mode skewer-mode json-mode js2-refactor multiple-cursors company-tern dash-functional web-beautify simple-httpd json-snatcher json-reformat js2-mode js-doc tern coffee-mode winum unfill fuzzy go-guru go-eldoc company-go go-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data auctex-latexmk company-auctex auctex powerline spinner hydra parent-mode projectile pkg-info epl flx smartparens iedit anzu evil goto-chg undo-tree highlight diminish bind-map bind-key packed f dash s helm avy helm-core async popup package-build yapfify xterm-color smeargle shell-pop pyvenv pytest pyenv-mode py-isort pip-requirements orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim multi-term mmm-mode markdown-toc markdown-mode magit-gitflow live-py-mode hy-mode htmlize helm-pydoc helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help disaster diff-hl cython-mode company-statistics company-c-headers company-anaconda company cmake-mode clang-format auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spacemacs-theme spaceline restart-emacs request rainbow-delimiters quelpa popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line)))
+ '(python-shell-interpreter "ipython" t)
+ '(require-final-newline nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -407,3 +453,64 @@ you should place your code here."
  '(font-lock-keyword-face ((t (:inherit regular :foreground "#4f97d7"))))
  '(org-level-1 ((t (:foreground "#4f97d7" :weight normal :height 1.3))))
  '(org-level-2 ((t (:foreground "#2d9574" :weight normal :height 1.2)))))
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(clang-format-executable "clang-format")
+ '(cquery-extra-args
+   (quote
+    ("--log-file /Users/mannyschneck/logs/cquery.log" "--log-stdin-stdout-to-stderr")) t)
+ '(debug-on-error nil)
+ '(evil-want-Y-yank-to-eol nil)
+ '(flycheck-c/c++-clang-executable nil)
+ '(flycheck-clang-args (quote ("-std=c++11")))
+ '(irony-cdb-compilation-databases (quote (irony-cdb-libclang)))
+ '(irony-cdb-search-directory-list
+   (quote
+    ("build/AllBuild/Ninja/Debug" "AllBuild" "Debug" "Ninja" "build")))
+ '(ns-auto-hide-menu-bar t)
+ '(org-agenda-files (quote ("~/org/personal.org" "~/org/phenix.org")))
+ '(org-modules
+   (quote
+    (org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail org-w3m org-drill)))
+ '(package-selected-packages
+   (quote
+    (import-js vdiff-magit dockerfile-mode docker tablist docker-tramp swift-mode racer org-mime omnisharp flycheck-rust csharp-mode cargo rust-mode cquery lsp-ui company-lsp lsp-mode ghub org-category-capture irony-eldoc company-irony-c-headers spotify helm-spotify multi rtags slack emojify circe oauth2 websocket ht cmake-ide levenshtein flycheck-irony company-irony irony helm-cscope xcscope helm-gtags ggtags stickyfunc-enhance srefactor yaml-mode powershell floobits racket-mode faceup idris-mode prop-menu livid-mode skewer-mode json-mode js2-refactor multiple-cursors company-tern dash-functional web-beautify simple-httpd json-snatcher json-reformat js2-mode js-doc tern coffee-mode winum unfill fuzzy go-guru go-eldoc company-go go-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data auctex-latexmk company-auctex auctex powerline spinner hydra parent-mode projectile pkg-info epl flx smartparens iedit anzu evil goto-chg undo-tree highlight diminish bind-map bind-key packed f dash s helm avy helm-core async popup package-build yapfify xterm-color smeargle shell-pop pyvenv pytest pyenv-mode py-isort pip-requirements orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim multi-term mmm-mode markdown-toc markdown-mode magit-gitflow live-py-mode hy-mode htmlize helm-pydoc helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help disaster diff-hl cython-mode company-statistics company-c-headers company-anaconda company cmake-mode clang-format auto-yasnippet yasnippet auto-dictionary anaconda-mode pythonic ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spacemacs-theme spaceline restart-emacs request rainbow-delimiters quelpa popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump define-word column-enforce-mode clean-aindent-mode auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line)))
+ '(python-shell-interpreter "ipython")
+ '(require-final-newline nil)
+ '(safe-local-variable-values
+   (quote
+    ((eval progn
+           (pp-buffer)
+           (indent-buffer))
+     (eval progn
+           (add-to-list
+            (quote exec-path)
+            (concat
+             (locate-dominating-file default-directory ".dir-locals.el")
+             "node_modules/.bin/")))
+     (typescript-backend . tide)
+     (typescript-backend . lsp)
+     (javascript-backend . tern)
+     (javascript-backend . lsp)))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ahs-face ((t (:background "DarkOliveGreen4" :foreground "gray91"))))
+ '(ediff-fine-diff-A ((t (:inherit bold :background "dark red"))))
+ '(ediff-fine-diff-B ((t (:inherit bold :background "dark green"))))
+ '(font-lock-function-name-face ((t (:inherit regular :foreground "#bc6ec5"))))
+ '(font-lock-keyword-face ((t (:inherit regular :foreground "#4f97d7"))))
+ '(org-level-1 ((t (:foreground "#4f97d7" :weight normal :height 1.3))))
+ '(org-level-2 ((t (:foreground "#2d9574" :weight normal :height 1.2)))))
+)
+

@@ -34,3 +34,5 @@ edbash(){
 vim ~/.bash_profile
 source ~/.bash_profile
 }
+
+export PATH="$HOME/.cargo/bin:$PATH"

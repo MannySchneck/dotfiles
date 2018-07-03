@@ -1,5 +1,5 @@
-PEER_APPLICATION_ID=test
-PEER_SECRET=secret
+export PEER_APPLICATION_ID=test
+export PEER_SECRET=secret
 
 alias buildall="scripts/build.sh -m AllBuild -g Ninja -b Debug"
 

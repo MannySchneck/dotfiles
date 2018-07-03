@@ -85,33 +85,7 @@ export SSH_KEY_PATH="~/.ssh/rsa_id"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-e () {
-    emacsclient $1 -c &
-}
-
-
-alias clonephenix='git clone ssh://manny@gerrit.phenixp2p.com:29418/phenix'
-alias cloneplatform='git clone ssh://manny@gerrit.phenixp2p.com:29418/platform'
-alias clonewebsdk='git clone ssh://manny@gerrit.phenixp2p.com:29418/WebSDK'
-
-alias build_platform='npm run grunt && npm run protobuf && NODE_ENV=development SERVER_APP=all-in-one npm start'
-alias run_platform='NODE_ENV=development SERVER_APP=all-in-one npm start'
-alias run_websdk="PHENIX_HTTPS_PFX=../platform/config/default/server.pfx PHENIX_HTTPS_PASSPHRASE=CorpyekGaf4 npm start"
-
-alias buildpeer="scripts/build.sh -m Peer -g Ninja -b Debug"
-alias configpeer="scripts/configure.sh -m Peer -g Ninja -b Debug"
-
-alias pingme="terminal-notifier -sound default -message"
-
-alias tb="scripts/ci-trigger-build.sh -u manny -c"
-
-alias gg="git log --oneline --abbrev-commit --branches=* HEAD --graph --decorate --color --simplify-by-decoration"
-
-alias gup="git-review -u && terminal-notifier -sound default -message \"Uploaded changes to gerrit\" || terminal-notifier -sound default -message \"Oh no. Something went wrong. No gerrit upload for you\""
-
-alias gupy="git-review -u -y && terminal-notifier -sound default -message \"Uploaded changes to gerrit\" || terminal-notifier -sound default -message \"Oh no. Something went wrong. No gerrit upload for you\""
-
-alias sdkclilocal="./SdkCliExe --pcast-uri wss://local.phenixp2p.com:8443"
+source $ZSH_CUSTOM/utils.zsh
 
 
 export NVM_DIR="/Users/mannyschneck/.nvm"
@@ -128,3 +102,12 @@ if [ -f '/Users/mannyschneck/google-cloud-sdk/path.zsh.inc' ]; then source '/Use
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/mannyschneck/google-cloud-sdk/completion.zsh.inc' ]; then source '/Users/mannyschneck/google-cloud-sdk/completion.zsh.inc'; fi
+export NACL_SDK_HOME=/Users/mannyschneck/bin/nacl_sdk
+export ANDROID_NDK_HOME=/Users/mannyschneck/bin/android-ndk-r14
+export ANDROID_SDK_HOME=/Users/mannyschneck/bin/android-sdk-macosx
+export NACL_SDK_HOME=/Users/mannyschneck/bin/nacl_sdk
+export ANDROID_NDK_HOME=/Users/mannyschneck/bin/android-ndk-r14
+export ANDROID_SDK_HOME=/Users/mannyschneck/bin/android-sdk-macosx
+export NACL_SDK_HOME=/Users/mannyschneck/bin/nacl_sdk
+export ANDROID_NDK_HOME=/Users/mannyschneck/bin/android-ndk-r14
+export ANDROID_SDK_HOME=/Users/mannyschneck/bin/android-sdk-macosx
