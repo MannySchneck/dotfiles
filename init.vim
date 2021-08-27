@@ -14,13 +14,12 @@ Plug 'christoomey/vim-tmux-navigator'
 "Color:
 "YAAAAAML:
 Plug 'stephpy/vim-yaml'
-Plug 'pedrohdz/im-yaml-folds'
+Plug 'pedrohdz/vim-yaml-folds'
 " Buffers. Protocol buffers.
 Plug 'jiangmiao/auto-pairs'
 "Golang:
 Plug 'fatih/vim-go'
 "Autocomplete:
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-compe'
 Plug 'nvim-lua/popup.nvim'
@@ -50,6 +49,9 @@ call plug#end()
 
 set termguicolors
 ""
+
+
+nmap <buffer> <silent> <nowait> <leader><c-r> <Plug>NetrwRefresh
 
 lua <<EOF
 local cb = require'diffview.config'.diffview_callback
@@ -164,7 +166,7 @@ require'compe'.setup {
   max_abbr_width = 100;
   max_kind_width = 100;
   max_menu_width = 100;
-  documentation = true;
+  --documentation = true;
 
   source = {
     path = true;
@@ -210,7 +212,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', '<space>la', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '[e', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']e', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
@@ -221,7 +223,7 @@ end
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
-local servers = { "pyright", "gopls" }
+local servers = { "pyright", "gopls", }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup { on_attach = on_attach }
 end
@@ -295,8 +297,6 @@ endfunction
 nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 
-" Symbol renaming.
-" nmap <leader>rn <Plug>(coc-rename)
 
 "SNIPPETS:
 "---------
@@ -311,6 +311,7 @@ let g:UltiSnipsEditSplit="vertical"
 " SEARCH:
 nnoremap <leader>* :Rg <c-r><c-w><cr>
 nnoremap <leader>sp :Rg
+nnoremap <leader>ss :BLines<space>
 
 
 "SHORTCUTS:
@@ -337,7 +338,7 @@ set noswapfile
 "set dir=~/.local/share/nvim/swap/
 
 " BUFFER nav
-map <leader>bb :Telescope buffers<cr>
+map <leader>bb :Buffers<cr>
 
 " Me Filez
 map <leader><space> :Files<cr>
@@ -380,14 +381,19 @@ nnoremap <leader>wd :quit<cr>
 
 set colorcolumn=80
 let g:netrw_liststyle = 3
+let g:netrw_banner = 0
 let g:argwrap_tail_comma = 1
+"let g:netrw_browse_split = 1 " horiz split
+"let g:netrw_winsize = 25
+
+
 nnoremap <silent> <leader>fa :ArgWrap<cr>
 
 nnoremap <leader>fs :write<cr>
 
 "HIGHLIGHTING
 "-------------
-map <leader>c :nohl<CR>
+nnoremap <leader>c :nohl<CR>
 " Highlight the current line the cursor is on
 set cursorline
 set guicursor+=n-v-c:blinkon1
