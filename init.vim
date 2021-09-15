@@ -10,6 +10,8 @@ call plug#begin('~/.config/nvim/plugged')
 
 "Tmux":
 Plug 'morhetz/gruvbox'
+Plug 'glepnir/indent-guides.nvim'
+Plug 'kyazdani42/nvim-web-devicons'
 Plug 'christoomey/vim-tmux-navigator'
 "Color:
 "YAAAAAML:
@@ -51,9 +53,10 @@ set termguicolors
 ""
 
 
+
 nmap <buffer> <silent> <nowait> <leader><c-r> <Plug>NetrwRefresh
 
-lua <<EOF
+lua << EOF
 local cb = require'diffview.config'.diffview_callback
 
 require'diffview'.setup {
@@ -296,6 +299,9 @@ endfunction
 " Use K to show documentation in preview window.
 nnoremap <silent> K :call <SID>show_documentation()<CR>
 
+nnoremap <leader>tn :tabn<CR>
+nnoremap <leader>tp :tabp<CR>
+
 
 
 "SNIPPETS:
@@ -424,3 +430,18 @@ highlight DiffText    gui=none guifg=bg guibg=#888888
 hi  StatusLineNC guifg=#999999 guibg=#222222
 hi  StatusLine guifg=#999999 guibg=#222222
 
+
+lua <<EOF
+require('indent_guides').setup({
+	indent_levels = 30;
+	indent_guide_size = 8;
+	indent_start_level = 1;
+	indent_enable = true;
+	indent_space_guides = true;
+	indent_tab_guides = true;
+	indent_soft_pattern = '\\s';
+	exclude_filetypes = {'help','dashboard','dashpreview','NvimTree','vista','sagahover'};
+	 even_colors = { fg ='#fa3834',bg='#433b46' };
+	odd_colors = {fg='#f32b36',bg='#4a4854'};
+})
+EOF
