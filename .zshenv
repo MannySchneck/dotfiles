@@ -15,3 +15,5 @@ alias pingme="terminal-notifier -sound default -message"
 
 
 if [ -e /Users/mannyschneck/.nix-profile/etc/profile.d/nix.sh ]; then . /Users/mannyschneck/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+. `which env_parallel.zsh`
+. "$HOME/.cargo/env"

@@ -10,6 +10,7 @@ call plug#begin('~/.config/nvim/plugged')
 
 "Tmux":
 Plug 'morhetz/gruvbox'
+Plug 'rakr/vim-two-firewatch'
 Plug 'glepnir/indent-guides.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'christoomey/vim-tmux-navigator'
@@ -22,8 +23,10 @@ Plug 'jiangmiao/auto-pairs'
 "Golang:
 Plug 'fatih/vim-go'
 "Autocomplete:
+" (recommend) LSP config
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-compe'
+Plug 'ray-x/lsp_signature.nvim'
 Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 " Plug 'nvim-telescope/telescope.nvim'
@@ -47,11 +50,17 @@ Plug 'FooSoft/vim-argwrap'
 Plug 'jvirtanen/vim-hcl'
 Plug 'tpope/vim-dadbod'
 Plug 'psliwka/vim-smoothie'
+Plug 'jpalardy/vim-slime'
 call plug#end()
 
+let g:smoothie_enabled=0
 set termguicolors
 ""
 
+" EXPERIMENTAL:
+let g:slime_target = "tmux"
+
+let &t_it=''
 
 
 nmap <buffer> <silent> <nowait> <leader><c-r> <Plug>NetrwRefresh
@@ -61,9 +70,9 @@ local cb = require'diffview.config'.diffview_callback
 
 require'diffview'.setup {
   diff_binaries = false,    -- Show diffs for binaries
+  use_icons = true,        -- Requires nvim-web-devicons
   file_panel = {
     width = 35,
-    use_icons = true        -- Requires nvim-web-devicons
   },
   key_bindings = {
     disable_defaults = false,                   -- Disable the default key bindings
@@ -184,6 +193,7 @@ require'compe'.setup {
 EOF
 
 inoremap <silent><expr> <C-Space> compe#complete()
+
 inoremap <silent><expr> <CR>      compe#confirm('<CR>')
 inoremap <silent><expr> <C-e>     compe#close('<C-e>')
 inoremap <silent><expr> <C-f>     compe#scroll({ 'delta': +4 })
@@ -192,17 +202,23 @@ inoremap <silent><expr> <C-d>     compe#scroll({ 'delta': -4 })
 lua <<EOF
 local nvim_lsp = require('lspconfig')
 
+
+local golang_setup = require "lsp_signature".on_attach()
+
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
+
   --Enable completion triggered by <c-x><c-o>
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   -- Mappings.
   local opts = { noremap=true, silent=true }
+
+
 
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
@@ -226,13 +242,14 @@ end
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
-local servers = { "pyright", "gopls", }
+local servers = { "pyright", "gopls"}
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup { on_attach = on_attach }
 end
+
+require'lsp_signature'.setup()
+
 EOF
-
-
 
 "COPY/PASTE:
 "-----------
@@ -251,9 +268,13 @@ EOF
 vnoremap < <gv
 vnoremap > >gv
 
+autocmd FileType go setlocal tabstop=8 noexpandtab
+autocmd FileType javascriptreact setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
+
 "COLOR:
 "------
-colorscheme gruvbox
+colorscheme gruvbox "two-firewatch
 
 "AUTO IMPORT:
 "------------
@@ -302,6 +323,11 @@ nnoremap <silent> K :call <SID>show_documentation()<CR>
 nnoremap <leader>tn :tabn<CR>
 nnoremap <leader>tp :tabp<CR>
 
+nnoremap <leader>gw :Git commit -am wip<CR>
+nnoremap <leader>ga. :Git add %<CR>
+
+nnoremap <leader>df :cd %:h<CR>
+nnoremap <leader>du :Gcd<CR>
 
 
 "SNIPPETS:
@@ -336,6 +362,7 @@ autocmd! bufwritepost init.vim source %
 "TEXT SEARCH:
 "------------
 "Makes Search Case Insensitive
+set ignorecase
 set smartcase
 
 "SWAP:
@@ -373,7 +400,7 @@ map <leader>tf :GoBuildTags
 " map <leader>la :CocAction<cr>
 map <leader>li :GoInfo<cr>
 map <leader>lI :GoImports<cr>
-
+map <leader>ld :GoDecls<cr>
 imap <F9> <C-o>:ArgWrap<cr>
 " imap <F10> <C-o>:CocAction<cr>
 
@@ -386,9 +413,9 @@ nnoremap <silent> <leader>wm :only<cr>
 nnoremap <leader>wd :quit<cr>
 
 set colorcolumn=80
-let g:netrw_liststyle = 3
+"let g:netrw_liststyle = 3
 let g:netrw_banner = 0
-let g:argwrap_tail_comma = 1
+"let g:argwrap_tail_comma = 1
 "let g:netrw_browse_split = 1 " horiz split
 "let g:netrw_winsize = 25
 
@@ -404,7 +431,7 @@ nnoremap <leader>c :nohl<CR>
 set cursorline
 set guicursor+=n-v-c:blinkon1
 
-:hi Comment guifg=#a5a6b5
+:hi Comment guifg=#CBC0B8 "#c8ae9d #a5a6b5
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
@@ -417,7 +444,7 @@ let g:go_term_width = 90
 autocmd BufWritePre * %s/\s\+$//e
 
 "python
-let g:python3_host_prog = expand('/Users/mannyschneck/venv/neovim/bin/python3.8')
+let g:python3_host_prog = expand('/Users/mannyschneck/venv/neovim/bin/python3')
 
 " STATUS BAR
 set statusline=%f\ %{FugitiveStatusline()}\ %c
@@ -431,17 +458,23 @@ hi  StatusLineNC guifg=#999999 guibg=#222222
 hi  StatusLine guifg=#999999 guibg=#222222
 
 
-lua <<EOF
-require('indent_guides').setup({
-	indent_levels = 30;
-	indent_guide_size = 8;
-	indent_start_level = 1;
-	indent_enable = true;
-	indent_space_guides = true;
-	indent_tab_guides = true;
-	indent_soft_pattern = '\\s';
-	exclude_filetypes = {'help','dashboard','dashpreview','NvimTree','vista','sagahover'};
-	 even_colors = { fg ='#fa3834',bg='#433b46' };
-	odd_colors = {fg='#f32b36',bg='#4a4854'};
-})
-EOF
+" lua <<EOF
+" require('indent_guides').setup({
+" 	indent_levels = 30;
+" 	indent_guide_size = 8;
+" 	indent_start_level = 1;
+" 	indent_enable = true;
+" 	indent_space_guides = true;
+" 	indent_tab_guides = true;
+" 	indent_soft_pattern = '\\s';
+" 	exclude_filetypes = {'help','dashboard','dashpreview','NvimTree','vista','sagahover'};
+" 	 even_colors = { fg ='#fa3834',bg='#433b46' };
+" 	odd_colors = {fg='#f32b36',bg='#4a4854'};
+" })
+" EOF
+
+
+" workaround for: https://github.com/neovim/neovim/issues/11330
+autocmd VimEnter * :silent exec "!kill -s SIGWINCH $PPID"
+set cmdheight=1
+
