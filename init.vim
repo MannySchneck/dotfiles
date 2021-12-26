@@ -51,6 +51,8 @@ Plug 'jvirtanen/vim-hcl'
 Plug 'tpope/vim-dadbod'
 Plug 'psliwka/vim-smoothie'
 Plug 'jpalardy/vim-slime'
+
+Plug 'jnurmine/Zenburn'
 call plug#end()
 
 let g:smoothie_enabled=0
